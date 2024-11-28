@@ -74,6 +74,7 @@ def ft_linear_regression(mileage_std, price):
         y_prediction = ft_predict_y(mileage_std, theta0, theta1)
         gradient_theta0 = sum(y_prediction[i] - price[i] for i in range(len(price))) / len(price)
         gradient_theta1 = sum((y_prediction[i] - price[i]) * mileage_std[i] for i in range(len(price))) / len(price)
+
         theta0 -= LEARNING_RATE * gradient_theta0
         theta1 -= LEARNING_RATE * gradient_theta1
         
