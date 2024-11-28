@@ -1,3 +1,4 @@
+import math
 import csv
 import json
 
@@ -13,21 +14,75 @@ def read_dataset():
         with open(DATAS, "r") as file:
             input_file = csv.DictReader(file)
             for row in input_file:
+                if not row["km"].isdigit() or not row["price"].isdigit():
+                    print(f"Invalid data found: {row}")
+                    continue
                 mileage.append(float(row["km"]))
                 price.append(float(row["price"]))
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Error: An error occurred: {e}")
         exit(1)
     return mileage, price
 
 
-def ft_linear_regression(mileage, price):
-    m = len(mileage)
+def ft_standard_deviation(mileage):
+    average = sum(mileage) / len(mileage)
+    squared_sum = sum((x - average) ** 2 for x in mileage)
+
+    standard_deviation = math.sqrt(squared_sum / len(mileage))
+
+    return standard_deviation
+
+
+def ft_standardise_data(mileage):
+    average = sum(mileage) / len(mileage)
+    standard_deviation = ft_standard_deviation(mileage)
+
+    mileage_standardized = [(x - average) / standard_deviation for x in mileage]
+
+    return mileage_standardized
+
+
+def ft_predict_y(mileage_std, theta0, theta1):
+    length = len(mileage_std)
+    y_prediction = [0] * length
+
+    for i in range(length):
+        y_prediction[i] = theta0 + (mileage_std[i] * theta1)
+
+    return y_prediction
+
+
+def ft_mean_absolute_error(price, y_prediction):
+    mae = 0
+    length = len(price)
+
+    for i in range(length):
+        mae += abs(y_prediction[i] - price[i]) / length
+
+    return mae
+
+
+def ft_linear_regression(mileage_std, price):
     theta0 = 0
     theta1 = 0
     
+    for iteration in range(ITERATIONS):
+        y_prediction = ft_predict_y(mileage_std, theta0, theta1)
+        gradient_theta0 = sum(y_prediction[i] - price[i] for i in range(len(price))) / len(price)
+        gradient_theta1 = sum((y_prediction[i] - price[i]) * mileage_std[i] for i in range(len(price))) / len(price)
+        theta0 -= LEARNING_RATE * gradient_theta0
+        theta1 -= LEARNING_RATE * gradient_theta1
+        
+        # if (iteration % 1000 == 0):
+        # print(f"Iteration {iteration} :")
+        # print(f"y_prediction : {y_prediction}")
+        # print(f"gradient_theta0 : {gradient_theta0}")
+        # print(f"gradient_theta1 : {gradient_theta1}")
+        # print(f"theta0 : {theta0}")
+        # print(f"theta1 : {theta1}\n")
+    return theta0, theta1
 
-    
 
 def update_parameters(theta0, theta1):
     try:
@@ -36,15 +91,16 @@ def update_parameters(theta0, theta1):
         data["theta0"] = theta0
         data["theta1"] = theta1
         with open(PARAMETERS, "w") as file:
-            file = json.dump(data, file)
+            json.dump(data, file)
     except Exception as e:
-        print(f"An error occured: {e}")
+        print(f"Error: An error occurred while updating parameters: {e}")
         exit(1)
 
 
 def main():
     mileage, price = read_dataset()
-    theta0, theta1 = ft_linear_regression(mileage, price)
+    mileage_std = ft_standardise_data(mileage)
+    theta0, theta1 = ft_linear_regression(mileage_std, price)
     update_parameters(theta0, theta1)
 
 

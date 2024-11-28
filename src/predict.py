@@ -7,7 +7,7 @@ def import_parameters():
             return json.load(file)
     except Exception as e:
         print(f"An error occurred: {e}")
-        exit 1
+        exit(1)
 
 
 def price_estimation(mileage, theta0, theta1):
@@ -27,7 +27,7 @@ def main():
             print("Invalid input, please enter a valid input (float).")
         except Exception as e:
             print(f"An error occurred: {e}")
-            exit 1
+            exit(1)
     price = price_estimation(mileage, theta0, theta1)
     print(f"Price estimated : {price}")
 

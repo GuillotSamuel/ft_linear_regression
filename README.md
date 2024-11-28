@@ -90,7 +90,7 @@ Minimiser l'erreur entre prédiction et valeurs réelles (cost function)
 
 ### Implémentation
 
-<!-- # Lecture des données
+# Lecture des données
 mileage = [m1, m2, ..., mn]
 price = [p1, p2, ..., pn]
 
@@ -119,4 +119,6 @@ for iteration in range(max_iterations):
     theta1 = tmp_theta1
 
 # Sauvegarder les paramètres
-save_to_file(theta0, theta1) -->
+save_to_file(theta0, theta1)
+
+
