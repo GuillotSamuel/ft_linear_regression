@@ -1,5 +1,5 @@
-
 import json
+
 
 def import_parameters():
     try:
@@ -11,6 +11,7 @@ def import_parameters():
 
 
 def price_estimation(mileage, theta0, theta1):
+
     return theta0 + (theta1 * mileage)
 
 
