@@ -1,6 +1,8 @@
 import math
 import csv
 import json
+import matplotlib.pyplot as plt
+import numpy as np
 
 DATAS = "../data/data.csv"
 PARAMETERS = "../models/parameters.json"
@@ -66,6 +68,7 @@ def ft_mean_absolute_error(price, y_prediction):
 def ft_linear_regression(mileage_std, price):
     theta0 = 0
     theta1 = 0
+    losses = []
     
     for iteration in range(ITERATIONS):
         y_prediction = ft_predict_y(mileage_std, theta0, theta1)
@@ -74,6 +77,9 @@ def ft_linear_regression(mileage_std, price):
         theta0 -= LEARNING_RATE * gradient_theta0
         theta1 -= LEARNING_RATE * gradient_theta1
         
+        loss = ft_mean_absolute_error(price, y_prediction)
+        losses.append(loss)
+        
         # if (iteration % 1000 == 0):
         # print(f"Iteration {iteration} :")
         # print(f"y_prediction : {y_prediction}")
@@ -81,7 +87,7 @@ def ft_linear_regression(mileage_std, price):
         # print(f"gradient_theta1 : {gradient_theta1}")
         # print(f"theta0 : {theta0}")
         # print(f"theta1 : {theta1}\n")
-    return theta0, theta1
+    return theta0, theta1, losses
 
 
 def update_parameters(theta0, theta1):
@@ -97,11 +103,37 @@ def update_parameters(theta0, theta1):
         exit(1)
 
 
+def plot_graph_display(mileage, price, theta0, theta1, losses):
+    plt.figure(figsize=(10, 8))
+
+    plt.subplot(2, 1, 1)
+    plt.scatter(mileage, price, color='blue', label='Data points')
+    
+    mileage_std = ft_standardise_data(mileage)
+    y_prediction = ft_predict_y(mileage_std, theta0, theta1)
+    
+    plt.plot(mileage, y_prediction, color='red', label='Regression line')
+    plt.xlabel("Mileage (Standardized)")
+    plt.ylabel("Price")
+    plt.title("Car Price Prediction")
+    plt.legend()
+
+    plt.subplot(2, 1, 2)
+    plt.plot(range(len(losses)), losses, color='green')
+    plt.xlabel("Iterations")
+    plt.ylabel("Loss (Mean Absolute Error)")
+    plt.title("Model Loss Over Time")
+
+    plt.tight_layout()
+    plt.savefig("../results/plot_graph.png")
+
+
 def main():
     mileage, price = read_dataset()
     mileage_std = ft_standardise_data(mileage)
-    theta0, theta1 = ft_linear_regression(mileage_std, price)
+    theta0, theta1, losses = ft_linear_regression(mileage_std, price)
     update_parameters(theta0, theta1)
+    plot_graph_display(mileage, price, theta0, theta1, losses)
 
 
 if __name__ == "__main__":
