@@ -11,7 +11,6 @@ def import_parameters():
 
 
 def price_estimation(mileage, theta0, theta1):
-
     return theta0 + (theta1 * mileage)
 
 
@@ -31,11 +30,11 @@ def main():
         except Exception as e:
             print(f"{e}")
             exit(1)
-    price = int(price_estimation(mileage, theta0, theta1))
+    price = price_estimation(mileage, theta0, theta1)
     if price <= 0:
         print(f"Price estimated : 0")
     else:
-    	print(f"Price estimated : {price}")
+    	print(f"Price estimated : {price:.2f}")
 
 
 if __name__ == "__main__":

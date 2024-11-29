@@ -36,7 +36,7 @@ def ft_standard_deviation(mileage):
     return standard_deviation
 
 
-def ft_standardise_data(mileage):
+def ft_standardise_data(mileage): # Standardisation (Z-Score Normalization)
     average = sum(mileage) / len(mileage)
     standard_deviation = ft_standard_deviation(mileage)
 
@@ -69,7 +69,9 @@ def ft_linear_regression(mileage_std, price):
     theta0 = 0
     theta1 = 0
     losses = []
-    
+
+    std_dev = ft_standard_deviation(mileage_std)
+
     for iteration in range(ITERATIONS):
         y_prediction = ft_predict_y(mileage_std, theta0, theta1)
         gradient_theta0 = sum(y_prediction[i] - price[i] for i in range(len(price))) / len(price)
@@ -77,17 +79,11 @@ def ft_linear_regression(mileage_std, price):
 
         theta0 -= LEARNING_RATE * gradient_theta0
         theta1 -= LEARNING_RATE * gradient_theta1
-        
+
         loss = ft_mean_absolute_error(price, y_prediction)
         losses.append(loss)
-        
-        # if (iteration % 1000 == 0):
-        # print(f"Iteration {iteration} :")
-        # print(f"y_prediction : {y_prediction}")
-        # print(f"gradient_theta0 : {gradient_theta0}")
-        # print(f"gradient_theta1 : {gradient_theta1}")
-        # print(f"theta0 : {theta0}")
-        # print(f"theta1 : {theta1}\n")
+
+        theta1 = theta1 * std_dev
     return theta0, theta1, losses
 
 
@@ -118,6 +114,7 @@ def plot_graph_display(mileage, price, theta0, theta1, losses):
     plt.ylabel("Price")
     plt.title("Car Price Prediction")
     plt.legend()
+    plt.grid(True)
 
     plt.subplot(2, 1, 2)
     plt.plot(range(len(losses)), losses, color='green')
@@ -126,7 +123,35 @@ def plot_graph_display(mileage, price, theta0, theta1, losses):
     plt.title("Model Loss Over Time")
 
     plt.tight_layout()
-    plt.savefig("../results/plot_graph.png")
+    plt.savefig("../results/plot_graph_std.png")
+
+
+def predict_price():
+    try:
+        with open(PARAMETERS, "r") as file:
+            data = json.load(file)
+        theta0 = data.get("theta0", 0)
+        theta1 = data.get("theta1", 0)
+        
+        km_input = input("Enter a mileage: ")
+        if not km_input.isdigit():
+            print("Invalid input, please enter a valid number.")
+            return
+        mileage = float(km_input)
+        
+        mileage_data, _ = read_dataset()
+        average = sum(mileage_data) / len(mileage_data)
+        std_dev = ft_standard_deviation(mileage_data)
+
+        mileage_std = (mileage - average) / std_dev
+
+        predicted_price = theta0 + theta1 * mileage_std
+        if predicted_price <= 0:
+            print(f"Price estimated for {mileage:.2f} km is 0 euros.")
+        else:
+            print(f"Price estimated for {mileage:.2f} km is {predicted_price:.2f} euros.")
+    except Exception as e:
+        print(f"Error : An error happened while predicting the price : {e}")
 
 
 def main():
@@ -135,7 +160,7 @@ def main():
     theta0, theta1, losses = ft_linear_regression(mileage_std, price)
     update_parameters(theta0, theta1)
     plot_graph_display(mileage, price, theta0, theta1, losses)
-
+    predict_price()
 
 if __name__ == "__main__":
     main()
